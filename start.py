@@ -48,7 +48,7 @@ PREPROCESSING = False
 TRANSFORMATION = False
 DATAMINING = False
 EVALUATION = False
-INTERPRETATION = True
+INTERPRETATION = False
 
 
 if __name__ == "__main__":
@@ -137,7 +137,7 @@ if __name__ == "__main__":
 		interpretation = Interpretation()
 
 		# infer the documen topic distribution per publication
-		# interpretation.infer_document_topic_distribution()
+		interpretation.infer_document_topic_distribution()
 
 		# obtain list of document titles per topic
 		interpretation.get_document_title_per_topic()
