@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 	Created by Shaheen Syed
 
@@ -182,6 +184,7 @@ class Interpretation():
 		# save plot
 		plt.tight_layout()
 		plt.savefig(self.output_folder + plot_save_name)
+		plt.close()
 
 	def plot_topics_over_time_stacked(self, plot_save_name = 'topics-over-time-stacked.pdf'):
 
@@ -225,6 +228,7 @@ class Interpretation():
 		# save plot
 		plt.tight_layout()
 		plt.savefig(self.output_folder + plot_save_name)
+		plt.close()
 
 
 	def plot_topic_co_occurrence(self, plot_save_name = 'topic-co-occurrence.pdf'):

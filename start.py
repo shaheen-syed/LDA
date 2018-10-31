@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 	Created by Shaheen Syed
 
@@ -46,7 +48,7 @@ PREPROCESSING = False
 TRANSFORMATION = False
 DATAMINING = False
 EVALUATION = False
-INTERPRETATION = False
+INTERPRETATION = True
 
 
 if __name__ == "__main__":
@@ -83,14 +85,14 @@ if __name__ == "__main__":
 	if TRANSFORMATION:
 		
 		"""
-			Transform data into Gensim dictionary, corpus and BOG features
+			Transform data into Gensim dictionary, corpus and BOW features
 		"""
 
 		# instantiate Transformation class
-		tranformation = Transformation()
+		transformation = Transformation()
 
 		# transform data to make it suitable for LDA analysis
-		tranformation.transform_for_lda(save_folder = 'files', min_num_word = 5, max_percentile_words = 0.90)
+		transformation.transform_for_lda(save_folder = 'files', min_num_word = 5, max_percentile_words = 0.90)
 
 
 	if DATAMINING:
@@ -135,7 +137,7 @@ if __name__ == "__main__":
 		interpretation = Interpretation()
 
 		# infer the documen topic distribution per publication
-		interpretation.infer_document_topic_distribution()
+		# interpretation.infer_document_topic_distribution()
 
 		# obtain list of document titles per topic
 		interpretation.get_document_title_per_topic()
