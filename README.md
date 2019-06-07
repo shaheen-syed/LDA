@@ -1,4 +1,4 @@
-# LDA Document Similarity
+# Perform Latent Dirichlet Allocation full workflow
 
 This repository contains all the code to perform a topic model analysis with latent Dirichlet allocation on a set of documents. It follows a systematic process that starts with data collections to extracting useful knowledge from derives patterns, here latent topics. The systematic process is called Knowledge Discovery in Database and each step in the KDD process has its accompanying file name. The start.py file can be configured to turn on/off certain parts of the data workflow. The full workflow is shown below:
 
@@ -44,7 +44,7 @@ Within start.py, there are 6 switches that can be set to True, either all at the
 
 They will be explained below
 
-## step 1 - EXTRACTION
+## STEP 1 - EXTRACTION
 
 The extraction phase involves the process of obtaining a set of documents from a repository, such as Scopus or the Web of Science, or it can involve the steps of scraping a 
 publisher’s website to retrieve full-text articles (typically in PDF format). Scopus generally provides publication abstracts, including all the meta-data (journal, authors, 
@@ -55,7 +55,7 @@ respected when building such scripts. Another option would be to manually downlo
 contains thousands or tens of thousands of articles. To enable a comparison of topics by time, or a comparison of topics by journals, it is important to store this information 
 alongside the content of the document.
 
-## step 2 - PREPROCESSING
+## STEP 2 - PREPROCESSING
 
 The pre-processing phase can be seen as the process of going from a document source to an interpretable representation for the topic model algorithm. This phase is typically different 
 for full-text and abstract data. One of the main differences is that abstract data is often provided in a clean format, whereas full-text is commonly obtained by converting a PDF document 
@@ -91,7 +91,7 @@ that uses a vocabulary and morphological analysis to reduce words to their base 
 Additionally, uppercase and lowercase words can be grouped for further normalization. The process of normalization is particularly critical for languages with a richer 
 morphology. Failing to do can cause the vocabulary to be overly large, which can slow down posterior inference, and can lead to topics of poor quality.
 
-## step 3 - TRANSFORMATION
+## STEP 3 - TRANSFORMATION
 
 The transformation phase includes the creation of a dictionary of words and preparing the data for the topic model software or package. The dictionary of words (also referred 
 to as the vocabulary) is typically a list of unique words represented as integers. For example, ‘fish’ is 1, ‘population’ is 2 and so on. The length of the dictionary is thus 
@@ -106,7 +106,7 @@ Several LDA tools are available and each of them requires a slightly different t
 they require a conversion from words to bag-of-words representation, to some matrix representation of the full corpus. Several LDA packages exist that might be worth 
 exploring: Gensim, Mallet, Stanford Topic Modeling Toolbox, Yahoo! LDA, and Mr. LDA.
 
-## step 4 - DATAMINING
+## STEP 4 - DATAMINING
 
 The data mining phase involves fitting or training the LDA model. It also involves a careful analysis of the hyper-parameters and the creation of different LDA models. Similarly to 
 the transformation phase, the use of a certain LDA module or software tool determines what parameters and hyper-parameters can be adjusted.
@@ -123,7 +123,7 @@ them. Such hyper-parameters include the number of epochs or passes over the corp
 and the starting points.
 
 
-## step 5 - EVALUATION
+## STEP 5 - EVALUATION
 
 The evaluation phase includes a careful analysis and inspection of the latent variables from the various created LDA models. Since LDA is an unsupervised machine learning technique, 
 extra care should be given during this post-analysis phase; in contrast to, for example, supervised methods where typically a labeled gold-standard dataset exist. 
@@ -148,7 +148,7 @@ The evaluation phase can also result in topics that are very similar (i.e., iden
 that are un-interpretable (i.e. nonsensical), or topics that contain unimportant, too specific, or too general words. In those cases, it would be wise to revisit the pre-processing 
 phase and repeat the analysis.
 
-## step 6 - INTERPRETATION
+## STEP 6 - INTERPRETATION
 
 The interpretation phase, although closely related to the evaluation phase, includes a more fine-grained understanding of the latent variables. The main goal of the interpretation 
 phase is to go beyond the latent variables and understand the latent variables in the context of the domain under study. This phase is highly depending on the research question 
