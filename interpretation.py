@@ -1,7 +1,19 @@
 # -*- coding: utf-8 -*-
 
 """
-	Created by Shaheen Syed
+	Created by:		Shaheen Syed
+	Date:			August 2018
+
+	The interpretation phase, although closely related to the evaluation phase, includes a more fine-grained understanding of the latent variables. The main goal of the interpretation 
+	phase is to go beyond the latent variables and understand the latent variables in the context of the domain under study. This phase is highly depending on the research question 
+	that we would want to have answered. What topics are present, how are they distributed over time, and how are they related to other topics are possible ways to explore the output 
+	of the LDA analysis. Similarly to the evaluation phase, aiming for a deeper understanding of the topics might also result in flaws in the analysis. For example, a visualization of 
+	the topics that places two very distinct topics in close proximity, high probability of a topic in a document that does not cover aspects of that topic, or topics that should not 
+	co-occur together are indicators of flaws or areas of improvements. In such cases, it would be wise to revisit the pre-processing phase and to re-run the analysis with, for instance, 
+	different model parameters or pre-processing steps.
+
+	IMPORTANT
+	Remember to label the words in the topics that were created during the evaluation phase. Update the function get_topic_label in helper_functions to reflect the correct number of labels.
 
 	For reference articles see:
 	Syed, S., Borit, M., & Spruit, M. (2018). Narrow lenses for capturing the complexity of fisheries: A topic analysis of fisheries science from 1990 to 2016. Fish and Fisheries, 19(4), 643–661. http://doi.org/10.1111/faf.12280
@@ -13,22 +25,14 @@
 """
 
 
-"""
-	IMPORT MODULES
-"""
+# packages and modules
 import logging, sys, re, matplotlib
 from operator import itemgetter
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_style("whitegrid")
 import pandas as pd
 import numpy as np
-
-
-"""
-	IMPORT CLASSES
-"""
 from database import MongoDatabase
 from helper_functions import *
 
@@ -43,17 +47,15 @@ class Interpretation():
 		# instantiate database
 		self.db = MongoDatabase()
 
-		# define plot folder
-		self.output_folder = 'output/'
-		create_dir(self.output_folder)
+		# location to store plots
+		self.plot_save_folder = os.path.join('files', 'plots')
 
-		# set utf8 encoding
-		reload(sys)
-		sys.setdefaultencoding('utf8')
+		# location to store tables to
+		self.table_save_folder = os.path.join('files', 'tables')
 
 	
 	def infer_document_topic_distribution(self, K = 10, dir_prior = 'auto', random_state = 42, num_pass = 15, iteration = 200, top_n_words = 10, 
-										models_folder = 'models', file_folder = 'files'):
+										models_folder = os.path.join('files', 'models'), lda_files_folder = os.path.join('files', 'lda')):
 
 
 		"""
@@ -64,17 +66,36 @@ class Interpretation():
 			Values for K, dir_prior, random_state, num_pass and iteratrion will become visible when plotting the coherence score. Use the model that 
 			achieved the highest coherence score.
 
-			models_folder = where the LDA models were stored
-			file_folder = where the corpus and dictionary are stored
+			Parameters
+			-----------
+			k: int
+				number of topics that resulted in the best decomposition of the underlying corpora
+			dir_prior: string
+				dirichlet priors 'auto', 'symmetric', 'asymmetric'
+			random_state: int
+				seed value for random initialization
+			num_pass: int
+				number of passes over the full corpus
+			iteration: int
+				max iterations for convergence
+			top_n_words: int
+				only print out the top N high probability words
+			models_folder: os.path
+				location of created LDA models
+			lda_files_folder: os.path
+				location of LDA corpus and dictionary
+			save_folder: os.path
+				location to store the tables
+
 		"""
 
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
 
 		# read dictionary and corpus
-		dictionary, corpus = get_dic_corpus(file_folder)
+		dictionary, corpus = get_dic_corpus(lda_files_folder)
 
 		# load LDA model according to parameters
-		model = load_LDA_model('{}/{}/{}/{}/{}/{}/lda.model'.format(models_folder, K, dir_prior, random_state, num_pass, iteration))
+		model = load_lda_model(os.path.join(models_folder, str(K), dir_prior, str(random_state), str(num_pass), str(iteration)))
 		
 		# load docs
 		D = self.db.read_collection(collection = 'publications_raw')
@@ -141,13 +162,18 @@ class Interpretation():
 			titles.append([d['year'], d['title'], d['journal'], dominant_topic_id, dominant_topic_percentage])
 		
 		# save to CSV
-		saveCSV(titles, 'titles-to-topics', folder = self.output_folder)
+		save_csv(titles, 'titles-to-topics', folder = self.table_save_folder)
 
 
 	def plot_topics_over_time(self, plot_save_name = 'topics-over-time.pdf'):
 
 		"""
 			Plot cumulative topic distribution over time
+
+			Parameters
+			----------
+			plot_save_name: string
+				name of the plot
 		"""
 
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
@@ -182,14 +208,18 @@ class Interpretation():
 			axs[index].set_ylim([0,0.4])
 
 		# save plot
-		plt.tight_layout()
-		plt.savefig(self.output_folder + plot_save_name)
+		plt.savefig(os.path.join(self.plot_save_folder, plot_save_name), bbox_inches='tight')
 		plt.close()
 
 	def plot_topics_over_time_stacked(self, plot_save_name = 'topics-over-time-stacked.pdf'):
 
 		"""
 			Plot topics over time stacked
+
+			Parameters
+			----------
+			plot_save_name: string
+				name of the plot
 		"""
 
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
@@ -226,8 +256,7 @@ class Interpretation():
 		plt.legend(reversed(handles), reversed(labels), loc = 'right', bbox_to_anchor=(1.35, 0.50), ncol=1, fancybox=False, shadow=False, fontsize=16)
 		
 		# save plot
-		plt.tight_layout()
-		plt.savefig(self.output_folder + plot_save_name)
+		plt.savefig(os.path.join(self.plot_save_folder, plot_save_name), bbox_inches='tight')
 		plt.close()
 
 
@@ -235,6 +264,11 @@ class Interpretation():
 
 		"""
 			Plot topic co-occurrence
+			
+			Parameters
+			----------
+			plot_save_name: string
+				name of the plot
 		"""
 
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
@@ -305,7 +339,7 @@ class Interpretation():
 
 		# plot the heatmap
 		ax = sns.heatmap(df, cmap = "Blues", annot = True, vmin = 0., vmax = 10., square = True, annot_kws = {"size": 11},
-							fmt = '.1f', mask= df <= 0.0, linewidths = .5, cbar = False)
+							fmt = '.1f', mask= df <= 0.0, linewidths = .5, cbar = False, yticklabels=True)
 
 		# adjust the figure somewhat
 		ax.xaxis.tick_top()
@@ -315,7 +349,7 @@ class Interpretation():
 		fig.set_size_inches(19, 6)
 
 		# save figure
-		fig.savefig(self.output_folder + plot_save_name , bbox_inches='tight')
+		fig.savefig(os.path.join(self.plot_save_folder,plot_save_name), bbox_inches='tight')
 
 
 """ 

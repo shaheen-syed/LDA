@@ -1,7 +1,42 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 """
-	Created by Shaheen Syed
+	Created by:	Shaheen Syed
+	Data:		August 2018
+
+	The pre-processing phase can be seen as the process of going from a document source to an interpretable representation for the topic model algorithm. This phase is typically different 
+	for full-text and abstract data. One of the main differences is that abstract data is often provided in a clean format, whereas full-text is commonly obtained by converting a PDF document 
+	into its plain text representation.
+
+	Within this phase, an important part is to filter out the content that is not important from a topic model's point-of-view, rather than from a human’s point-of-view. Abstract data 
+	usually comes in a clean format of around 300--400 words, and little additional text is added to it; typically the copyright statement is the only text that should be removed. 
+	In contrast, full-text articles can contain a lot of additional text that has been added by the publisher. This is article meta-data and boilerplate. It is important that such 
+	additional text is removed, and various methods to do so exist. Examples include: deleting the first cover page; deleting the first n-bits of the content; using regular expressions 
+	or other pattern matching techniques to find and remove additional text, or more advanced methods. For full-text articles, a choice can be made to also exclude the reference 
+	list or acknowledgment section of the publication.
+
+	Latent Dirichlet allocation, as well as other probabilistic topic models,  are bag-of-words (BOW) models. Therefore, the words within the documents need to be tokenized; the process 
+	of obtaining individual words (also known as unigrams) from sentences. For English text, splitting words on white spaces would be the easiest example. Besides obtaining unigrams, it 
+	is also important to find multi-word expressions, such as two-word (bi-grams) or multi-word (n-grams) combinations. Named entity recognition (NER)---a technique from natural 
+	language processing (NLP)---can, for instance, be used to find multi-word expressions related to names, nationalities, companies, locations, and objects within the documents. 
+	The inclusion of bi-grams and entities allows for a richer bag-of-words representation than a standard unigram representation. Documents from languages with implicit word boundaries 
+	may require a more advanced type of tokenization.
+
+	Although all tokens within a document serve an important grammatical or syntactical function, for topic modeling they are not all equally important. Words need to be filtered for 
+	numbers, punctuation marks, and single-character words as they bear no topical meaning. Furthermore, stop words (e.g., the, is, a, which) are words that have no specific meaning 
+	from a topical point-of-view, and such words need to be removed as well. For English, and a number of other languages, there exist fixed lists of stop words that can easily be used 
+	(many NLP packages such as NLTK and Spacy include them). However, it is important to also create a domain-specific (also referred to as corpus-specific) list of stop words and filter 
+	for those words. Such domain-specific stop words can also become apparent in the evaluation phase. If this is the case, going back to the pre-processing phase and excluding them would 
+	be a good approach. Another approach to removing stop words is to use TF-IDF and include or exclude words within a certain threshold. Contrary to our analysis, some have indicated 
+	that removing stop words have no substantial effect on model likelihood, topic coherence, or classification accuracy.
+
+	For grammatical reasons, different word forms or derivationally related words can have a similar meaning and, ideally, for a topic model analysis, such terms need to be 
+	grouped (i.e., they need to be normalized). Stemming and lemmatization are two NLP techniques to reduce inflectional and derivational forms of words to a common base 
+	form. Stemming heuristically cuts off derivational affixes to achieve some normalization, albeit crude in most cases. Stemming loses the ability to relate stemmed words 
+	back to their original part-of-speech, such as verbs or nouns, and decreases the interpretability of topics in later stages. Lemmatization is a more sophisticated normalization method 
+	that uses a vocabulary and morphological analysis to reduce words to their base form, called lemma. For increased topic interpretability, we recommend lemmatization over stemming. 
+	Additionally, uppercase and lowercase words can be grouped for further normalization. The process of normalization is particularly critical for languages with a richer 
+	morphology. Failing to do can cause the vocabulary to be overly large, which can slow down posterior inference, and can lead to topics of poor quality.
 
 	For reference articles see:
 	Syed, S., Borit, M., & Spruit, M. (2018). Narrow lenses for capturing the complexity of fisheries: A topic analysis of fisheries science from 1990 to 2016. Fish and Fisheries, 19(4), 643–661. http://doi.org/10.1111/faf.12280
@@ -12,16 +47,10 @@
 
 """
 
-"""
-	IMPORT MODULES
-"""
+# packages and modules
 import logging, sys, spacy
 from collections import Counter
 import itertools
-
-"""
-	IMPORT CLASSES
-"""
 from database import MongoDatabase
 from helper_functions import *
 
@@ -39,8 +68,7 @@ class Preprocessing():
 		reload(sys)
 		sys.setdefaultencoding('utf8')
 
-
-	def full_text_preprocessing(self, pdf_folder):
+	def full_text_preprocessing(self, pdf_folder = os.path.join('files', 'pdf')):
 
 
 		"""
@@ -51,6 +79,11 @@ class Preprocessing():
 			- remove boilerplate
 			- remove bibliography
 			- remove acknowledgements
+
+			Parameters
+			----------
+			pdf_folder : os.path
+				location where PDF documents are stored
 		"""
 		
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
@@ -133,6 +166,11 @@ class Preprocessing():
 
 		"""
 			General preprocessing of publications (used for abstracts and full-text)
+
+			Parameters
+			----------
+			min_bigram_count : int (optional)
+				frequency of bigram to occur to include into list of bigrams. Thus lower frequency than min_bigram_count will not be included.
 		"""
 
 		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
