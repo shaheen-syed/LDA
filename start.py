@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
 			Several LDA tools are available and each of them requires a slightly different transformation step to make the data suitable for topic analysis. However, in essence, 
 			they require a conversion from words to bag-of-words representation, to some matrix representation of the full corpus. Several LDA packages exist that might be worth 
-			exploring: Gensim, Mallet, Stanford Topic Modeling Toolbox, Yahoo! LDA, and Mr.~LDA.
+			exploring: Gensim, Mallet, Stanford Topic Modeling Toolbox, Yahoo! LDA, and Mr. LDA.
 		"""
 
 		# instantiate Transformation class
