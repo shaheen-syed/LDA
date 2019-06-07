@@ -1,6 +1,16 @@
 # Perform Latent Dirichlet Allocation full workflow
 
-This repository contains all the code to perform a topic model analysis with latent Dirichlet allocation on a set of documents. It follows a systematic process that starts with data collections to extracting useful knowledge from derives patterns, here latent topics. The systematic process is called Knowledge Discovery in Database and each step in the KDD process has its accompanying file name. The start.py file can be configured to turn on/off certain parts of the data workflow. The full workflow is shown below:
+This repository contains all the code to perform a topic model analysis with latent Dirichlet allocation on a set of documents. It follows a systematic process that starts with data collection and ends with extracting useful knowledge from the derived patterns, here latent topics. The systematic process is called Knowledge Discovery in Database and each step in the KDD process has its accompanying file name (for example, extraction.py). The start.py file can be configured to turn on/off certain parts of the data workflow. 
+
+It contains:
+- code to scrape full-text PDF articles
+- all LDA preprocessing steps
+- model creation by grid search (for hyper-parameter optimization)
+- inspecting created LDA models
+- inferring document-topic distributions
+- exploring and plotting topics within the corpus
+
+The full workflow is shown below:
 
 ![ScreenShot](/workflow/lda-workflow.png)
 
