@@ -352,6 +352,76 @@ class Interpretation():
 		fig.savefig(os.path.join(self.plot_save_folder,plot_save_name), bbox_inches='tight')
 
 
+	def plot_topics_in_journals(self, plot_save_name = 'topics-in-journals.pdf'):
+
+		"""
+			Plot the distribution of topics within each of the journals in our dataset.
+			This plot provides an overview of the topical content published by a journal given the time frame of our dataset
+
+			Parameters
+			----------
+			plot_save_name: string
+				name of the plot
+		"""
+
+		logging.info('Start {}'.format(sys._getframe().f_code.co_name))
+		
+		# create dictionary where we have key = journal, and value = [topic_distributions]
+		journal_to_topics = {}
+
+		# load documents from database
+		D = self.db.read_collection(collection = 'publications')
+
+		# loop over the documents, read in the topic distribution, and add to the correct journal key
+		for i, d in enumerate(D):
+
+			# verbose process every 1000th document
+			if i % 1000 == 0: logging.debug('Processing document {}/{}'.format(i, D.count()))
+
+			# get the name of the journal
+			journal = d['journal']
+
+			# check if topics are created
+			if d.get('topics') is not None:
+
+				# add journal as key to the dictionary if not already exists
+				if journal not in journal_to_topics:
+					
+					# add journal as key with empty list
+					journal_to_topics[journal] = []
+
+				# sort topics and create as list
+				topics = [value for key, value in sorted(d['topics'].iteritems(), key=lambda x: int(x[0]))]
+
+				# append topic distribution to dictionary
+				journal_to_topics[journal].append(topics)
+
+		# get cumulative topic distributions for each journa
+		journal_to_cum_topics = get_journal_to_cum_topics(journal_to_topics)
+
+		# convert to Pandas DataFrame
+		df = pd.DataFrame.from_dict(journal_to_cum_topics).T
+
+		# change column labels to topic labels
+		df.columns = [get_topic_label(x) for x in df.columns.values]
+
+		# plot the heatmap
+		ax = sns.heatmap(df, cmap = "Blues", annot = True, vmin = 0., vmax = .3, square = True, annot_kws = {"size": 11}, fmt = '.2f', mask= df <= 0.0, linewidths = .5, cbar = False, yticklabels = True)
+
+		# adjust the figure somewhat
+		ax.xaxis.tick_top()
+		plt.yticks(rotation = 0)
+		plt.xticks(rotation = 90, ha = 'left') 
+		fig = ax.get_figure()
+		fig.set_size_inches(10, 10)
+
+		# save figure
+		fig.savefig(os.path.join(self.plot_save_folder, plot_save_name), bbox_inches='tight')
+
+		# close thee plot
+		plt.close()
+
+
 """ 
 
 internal helper function
@@ -396,8 +466,19 @@ def get_year_to_topics(D):
 def get_year_to_cum_topics(year_to_topics):
 
 	"""
-		Create dictionary where we obtain the cunulative document-topic distributions per year 
+		Create dictionary where we obtain the cumulative document-topic distributions per year 
 		cumulative document-topic distributions are mean values for each topic
+
+
+		Parameters
+		----------
+		year_to_topics : dictionary
+			dictionary with key = year and value = list of sorted topic distributions
+
+		Returns
+		---------
+		year_to_cum_topics : dictionary
+			dictionary with key = year and value = cumulative topic distribution, meaning the mean of all topic distributions from that journal
 	"""
 
 	# create empty dictionay
@@ -407,10 +488,41 @@ def get_year_to_cum_topics(year_to_topics):
 	for k, v in year_to_topics.iteritems():
 
 		# calculate the column mean
-		mean_topics = np.mean(np.array(v), axis=0)
+		mean_topics = np.mean(np.array(v), axis = 0)
 		
 		# add to dictionary so we can obtain it later on
 		year_to_cum_topics[k] = mean_topics
 	
 
 	return year_to_cum_topics
+
+def get_journal_to_cum_topics(journal_to_topics):
+
+	"""
+		Create a dictionary with the cumulative topic distribution of a journal
+
+		Parameters
+		----------
+		journal_to_topics : dictionary
+			dictionary with key = journal and value = list of sorted topic distributions
+
+		Returns
+		---------
+		journal_to_cum_topics : dictionary
+			dictionary with key = journal and value = cumulative topic distribution, meaning the mean of all topic distributions from that journal
+	"""
+
+	# create empty dictionay
+	journal_to_cum_topics = {}
+
+	# loop over year_to_topics dictionary are calculate mean of topics
+	for k, v in journal_to_topics.iteritems():
+
+		# calculate the column mean
+		mean_topics = np.mean(np.array(v), axis = 0)
+		
+		# add to dictionary with key = journal and value = cumulative topic distribution
+		journal_to_cum_topics[k] = mean_topics
+	
+	return journal_to_cum_topics
+

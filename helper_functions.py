@@ -58,7 +58,7 @@ def create_directory(name):
 			os.makedirs(name)
 			logging.info('Created directory: {}'.format(name))
 	except Exception, e:
-		logging.error('[createDirectory] : {}'.format(e))
+		logging.error("[{}] : {}".format(sys._getframe().f_code.co_name,e))
 		exit(1)
 
 
@@ -193,9 +193,9 @@ def read_directory(directory):
 	"""
 	
 	try:
-		return glob2.glob(os.path.join( directory, '**' , '*.*'))
+		return glob2.glob(os.path.join(directory, '**' , '*.*'))
 	except Exception, e:
-		logging.error('[read_directory] : {}'.format(e))
+		logging.error("[{}] : {}".format(sys._getframe().f_code.co_name,e))
 		exit(1)
 
 

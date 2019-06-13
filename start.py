@@ -254,3 +254,6 @@ if __name__ == "__main__":
 
 		# plot topic co-occurrence
 		interpretation.plot_topic_co_occurrence()
+
+		# plot topics by journal(s)
+		interpretation.plot_topics_in_journals()
